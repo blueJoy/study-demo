@@ -5,7 +5,7 @@
 3. 通过ServiceLoader.load方法获取实现
 
 
-###扩展dubbo spi 的实现：
+### 扩展dubbo spi 的实现：
 1. 可以方便的获取某一个想要的扩展实现，java的SPI机制就没有提供这样的功能
 
 2. 对于扩展实现IOC依赖注入功能：
