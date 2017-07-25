@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * Created by baixiangzhu on 2017/7/17.
  */
 @RestController
-public class TestMyBatisController extends BaseController{
+public class MyBatisController extends BaseController{
 
     @Autowired
     private TitlesService titlesService;
