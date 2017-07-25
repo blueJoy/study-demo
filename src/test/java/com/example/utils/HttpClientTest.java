@@ -2,6 +2,8 @@ package com.example.utils;
 
 
 import org.junit.*;
+
+import java.io.File;
 import java.util.*;
 
 /**
@@ -129,6 +131,21 @@ public class HttpClientTest {
         String result = HttpUtils.postFromQueryParameters(url,body,headers,parameters);
 
         Assert.assertEquals(ASSERT_MSG,"{\"id\":\"2\",\"name\":\"qq\",\"sex\":null,\"age\":0}",result);
+
+    }
+
+    @Test
+    public void postFile(){
+
+        String url =  TEST_URL + "/upload" + QUERY_PARAMTERS;
+
+        File file = new File("E:/text.txt");
+
+        System.out.println(file.isFile());
+
+        String result = HttpUtils.postFile(url, file,null,headers);
+
+        System.out.println(result);
 
     }
 

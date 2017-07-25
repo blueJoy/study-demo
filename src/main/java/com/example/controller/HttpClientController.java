@@ -1,8 +1,11 @@
 package com.example.controller;
 
 import com.example.entity.User;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
 import java.util.Map;
 
 /**
@@ -53,11 +56,51 @@ public class HttpClientController {
     @PostMapping("/noResult")
     public void postNoResult(@RequestBody User user, @RequestHeader Map<String,String> headers){
 
-        headers.forEach((k,v) ->{
-            System.out.println(k +"-->"+ v);
-        });
+        headers.forEach((k,v) ->System.out.println(k +"-->"+ v));
 
         System.out.println(user);
+    }
+
+    @PostMapping("/upload")
+    public String uploadFile(@RequestParam(value = "file", required = false) MultipartFile file,String id,@RequestHeader Map<String,String> headers){
+
+        headers.forEach((k,v) ->System.out.println(k +"-->"+ v));
+
+        String filename = file.getOriginalFilename();
+        System.out.println(filename);
+
+        InputStream in = null;
+        OutputStream out = null;
+
+        try {
+            in = file.getInputStream();
+
+            File outFile = new File("a.txt");
+
+            out = new FileOutputStream(outFile);
+
+            IOUtils.copy(in,out);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if (in != null){
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(out != null){
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return filename;
     }
 
 

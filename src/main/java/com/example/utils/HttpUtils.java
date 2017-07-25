@@ -2,12 +2,14 @@ package com.example.utils;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -15,6 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,7 +45,8 @@ public class HttpUtils {
 
     private static final String DEFAULT_CHARSET = "UTF-8";
     private static final String URL_IS_NULL_EXCEPTION = "the http url is null";
-//    private static final String DEFAULT_CONTENT_TYPE="application/json;charset=utf-8";
+    private static final String DEFAULT_CONTENT_TYPE_KEY="content-type";
+    private static final String DEFAULT_CONTENT_TYPE_VALUE="application/json;charset=utf-8";
     /**
      * 默认为application/json..如果有其他Content-Type的需求，需进行修改
      */
@@ -50,6 +54,7 @@ public class HttpUtils {
 
     /**
      * 获取连接
+     *      默认使用：PoolingHttpClientConnectionManager 连接池管理，默认最大20个连接
      * @return
      */
     private static CloseableHttpClient getHttpClient() {
@@ -143,25 +148,12 @@ public class HttpUtils {
 
         HttpPost post = new HttpPost(url);
 
-        if(body != null && !body.isEmpty()){
-//            StringEntity entity = new StringEntity(JSON.toJSONString(body), DEFAULT_CHARSET);
-//            entity.setContentType(DEFAULT_CONTENT_TYPE);
-            post.setEntity(new StringEntity(JSON.toJSONString(body), DEFAULT_CONTENT_TYPE));
-
-            //可以改成其他的Entity
-           /* Map<String,String> by = new HashMap<>();
-
-            body.forEach((k,v) -> by.put(k,String.valueOf(v)));
-
-            try {
-                post.setEntity(new UrlEncodedFormEntity(convert2Nvps(by)));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }*/
-        }
+        //setEntity(post,body,headers);
+        post.setEntity(new StringEntity(JSON.toJSONString(body), DEFAULT_CONTENT_TYPE));
 
         return getResult(post,headers);
     }
+
 
     /**
      * url含参数的无header的POST请求
@@ -202,6 +194,38 @@ public class HttpUtils {
 
         return getResult(post,headers);
     }
+
+    public static String postFile(String url,File file){
+        return postFile(url,file,null,null);
+    }
+
+    public static String postFile(String url,File file,Map<String,String> queryParameters){
+
+        return postFile(url,file,queryParameters,null);
+    }
+
+    public static String postFile(String url,File file,Map<String,String> queryParameters,Map<String,String> headers){
+
+        HttpPost post;
+
+        if(queryParameters == null || queryParameters.isEmpty()){
+
+            post = new HttpPost(url);
+
+        }else{
+            URI uri = getFromUrlAndParameters(url, queryParameters);
+            if(uri == null) return null;
+            post = new HttpPost(uri);
+        }
+
+        post.setEntity( MultipartEntityBuilder.create()
+                .addBinaryBody("file",file).build());
+
+        return getResult(post,headers);
+
+    }
+
+
 
 
 
@@ -344,6 +368,49 @@ public class HttpUtils {
 
 
 
+    /**
+     * http 设置body
+     * @param body
+     */
+    private static void setEntity(HttpEntityEnclosingRequestBase request,Map<String, Object> body,Map<String,String> headers) {
+
+        if(body != null && !body.isEmpty()){
+
+            String contentType = null;
+
+            if(headers == null || headers.isEmpty() || !isContainsContentType(headers,contentType)){
+
+                request.setEntity(new StringEntity(JSON.toJSONString(body), DEFAULT_CONTENT_TYPE));
+                return;
+            }
+
+            StringEntity entity = new StringEntity(JSON.toJSONString(body), DEFAULT_CHARSET);
+            entity.setContentType(contentType);
+            request.setEntity(entity);
+        }
+
+    }
+
+
+    /**
+     * 是否包含ContentType 设置
+     * @param headers
+     * @param contentType
+     * @return
+     */
+    private static boolean isContainsContentType(Map<String, String> headers, String contentType) {
+
+        for (String key : headers.keySet()){
+            if(key != null && DEFAULT_CONTENT_TYPE_KEY.equals(key.toLowerCase())){
+                contentType = headers.get(key);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
 
     private static URI getFromUrlAndParameters(String url,Map<String,String> queryParameters){
 
@@ -391,7 +458,7 @@ public class HttpUtils {
 
             HttpEntity entity = response.getEntity();
 
-            if(response.getStatusLine().getStatusCode() != 200){
+            if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK){
 
                 log.error("the http get response statusCode is not 200!url=[{}]",request.getURI());
 
