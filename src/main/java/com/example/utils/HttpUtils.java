@@ -195,15 +195,36 @@ public class HttpUtils {
         return getResult(post,headers);
     }
 
+    /**
+     * Post 上传文件
+     * @param url
+     * @param file
+     * @return
+     */
     public static String postFile(String url,File file){
         return postFile(url,file,null,null);
     }
 
+    /**
+     * url含参数Post上传文件
+     * @param url
+     * @param file
+     * @param queryParameters
+     * @return
+     */
     public static String postFile(String url,File file,Map<String,String> queryParameters){
 
         return postFile(url,file,queryParameters,null);
     }
 
+    /**
+     * 含header的Post上传文件
+     * @param url
+     * @param file
+     * @param queryParameters
+     * @param headers
+     * @return
+     */
     public static String postFile(String url,File file,Map<String,String> queryParameters,Map<String,String> headers){
 
         HttpPost post;
