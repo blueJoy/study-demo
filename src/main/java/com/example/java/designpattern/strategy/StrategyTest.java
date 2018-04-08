@@ -1,9 +1,9 @@
-package com.example.designpattern.strategy;
+package com.example.java.designpattern.strategy;
 
-import com.example.designpattern.strategy.behavior.FlayWithWings;
-import com.example.designpattern.strategy.behavior.Squeak;
-import com.example.designpattern.strategy.duck.DecoyDuck;
-import com.example.designpattern.strategy.duck.Duck;
+import com.example.java.designpattern.strategy.behavior.FlayWithWings;
+import com.example.java.designpattern.strategy.behavior.Squeak;
+import com.example.java.designpattern.strategy.duck.DecoyDuck;
+import com.example.java.designpattern.strategy.duck.Duck;
 
 /**
  *

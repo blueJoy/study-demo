@@ -1,7 +1,7 @@
-package com.example.designpattern.strategy.duck;
+package com.example.java.designpattern.strategy.duck;
 
-import com.example.designpattern.strategy.behavior.FlayBehavior;
-import com.example.designpattern.strategy.behavior.QuackBehavior;
+import com.example.java.designpattern.strategy.behavior.FlayBehavior;
+import com.example.java.designpattern.strategy.behavior.QuackBehavior;
 
 /**
  * 鸭子父类

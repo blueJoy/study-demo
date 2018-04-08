@@ -1,4 +1,4 @@
-package com.example.designpattern.strategy.duck;
+package com.example.java.designpattern.strategy.duck;
 
 /**
  * @author baixiangzhu

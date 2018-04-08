@@ -1,4 +1,4 @@
-package com.example.designpattern.strategy.behavior;
+package com.example.java.designpattern.strategy.behavior;
 
 /**
  * @author baixiangzhu
