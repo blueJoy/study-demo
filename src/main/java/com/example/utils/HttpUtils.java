@@ -7,21 +7,33 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -52,13 +64,45 @@ public class HttpUtils {
      */
     private static final ContentType DEFAULT_CONTENT_TYPE = ContentType.APPLICATION_JSON;
 
+
+    private static final String HTTP = "http:";
+    private static final String HTTPS = "https:";
+
+
     /**
      * 获取连接
      *      默认使用：PoolingHttpClientConnectionManager 连接池管理，默认最大20个连接
      * @return
      */
-    private static CloseableHttpClient getHttpClient() {
+    private static CloseableHttpClient getHttpClient(String url) {
+
+        if(url.contains(HTTPS))
+            return HttpClients.custom().setSSLSocketFactory(createSSLSocketFacotry()).build();
+
         return HttpClients.createDefault();
+    }
+
+    private static LayeredConnectionSocketFactory createSSLSocketFacotry() {
+
+        try {
+            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                    return true;
+                }
+            }).build();
+
+            return new SSLConnectionSocketFactory(sslContext);
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 
@@ -449,24 +493,12 @@ public class HttpUtils {
         return null;
     }
 
-    public static void main(String[] args) {
-
-        String url = "http://www.baidu.com";
-        Map<String,String> paramters = new HashMap<>();
-        paramters.put("id","1111");
-
-        URI uri = getFromUrlAndParameters(url, paramters);
-
-        System.out.println(uri);
-
-    }
-
 
     private static String getResult(HttpRequestBase request,Map<String,String> headers){
 
         String resultContent = null;
 
-        CloseableHttpClient client = getHttpClient();
+        CloseableHttpClient client = getHttpClient(request.getURI().toString());
         try {
 
             //设置配置
